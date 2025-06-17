@@ -25,12 +25,12 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body
         // Apply Geist font variables and antialiased class
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased h-full overflow-hidden`}
       >
         {/* Wrap your entire application content with AuthProvider */}
         <AuthProvider>
           {/* Your global Navbar component */}
-          
+          <Navbar/>
           {children} {/* This represents your page components */}
         </AuthProvider>
       </body>

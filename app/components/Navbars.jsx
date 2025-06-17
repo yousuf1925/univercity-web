@@ -22,7 +22,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="bg-[#262d34] text-white p-2 shadow-md"> {/* Applied user's background color and text color */}
+    <nav className="bg-[#262d34] text-white p-2 shadow-md "> {/* Applied user's background color and text color */}
       <div className='flex items-center justify-between p-0 container mx-auto'> {/* Added container and mx-auto for centering */}
         {/* Logo and App Name */}
         <div className='flex items-center gap-2'>

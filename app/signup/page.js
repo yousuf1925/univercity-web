@@ -13,7 +13,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState('');
   const [university, setUniversity] = useState('');
   const [major, setMajor] = useState('');
-  const [year, setYear] = useState('');
+  const [year, setYear] = useState(''); // Initialized as empty string
 
   // State for loading status during API call
   const [loading, setLoading] = useState(false);
@@ -49,7 +49,7 @@ export default function SignupPage() {
     try {
       // Make the API call to your backend registration endpoint
       // Ensure the URL matches your Next.js API route path
-      const response = await fetch('http://localhost:3001/api/auth', {
+      const response = await fetch('http://localhost:3000/api/auth', { // Ensure port is 3001 if your server runs there
         method: 'POST', // Using POST for registration
         headers: {
           'Content-Type': 'application/json',
@@ -91,7 +91,7 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-      <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-lg">
+      <div className="bg-black p-8 rounded-lg shadow-xl w-full max-w-lg">
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Sign Up</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -173,7 +173,8 @@ export default function SignupPage() {
               id="year"
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition duration-150 ease-in-out"
               placeholder="e.g., 2 (for sophomore)"
-              value={year}
+              // FIX: Ensures value is always a string or number, explicitly handling null/undefined/NaN
+              value={year === null || year === undefined || isNaN(year) ? '' : year}
               onChange={(e) => setYear(e.target.value)}
               required
             />

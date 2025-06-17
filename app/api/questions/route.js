@@ -86,6 +86,7 @@ export async function GET(request) {
     const university = searchParams.get('university'); // Keep for potential future filtering
     const major = searchParams.get('major');           // Keep for potential future filtering
     const tag = searchParams.get('tag');               // Keep for potential future filtering
+    const sort = searchParams.get('sort');
 
     const query = {}; // MongoDB query object
 
@@ -109,7 +110,9 @@ export async function GET(request) {
       query.$or = [{ majorTags: tag }, { generalTags: tag }];
     }
 
+    // FIX: Ensure sortOptions is always initialized as an object before conditional assignment
     let sortOptions = { createdAt: -1 }; // Default sort: newest first
+
     // Add sorting options
     if (sort === 'views') {
       sortOptions = { views: -1 }; // Sort by most views
@@ -119,7 +122,7 @@ export async function GET(request) {
     // 2. Fetch questions from the database
     const questions = await Question.find(query)
       .populate('author', 'username profilePicture university reputationScore') // Populate author details
-      .sort(sortOptions)
+      .sort(sortOptions) // Use the initialized sortOptions
       .limit(limit)
       .skip((page - 1) * limit); // Apply pagination
 

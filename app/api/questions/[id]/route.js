@@ -1,9 +1,9 @@
 // src/app/api/questions/route.js
 import { NextResponse } from 'next/server';
-import connectToDatabase from '@/lib/mongodb'; // Your MongoDB connection utility
-import Question from '@/models/Question';      // Your Question model
-import User from '@/models/User';              // Your User model (for updating questionsAsked count)
-import { protect } from '@/middleware/auth';    // Your authentication middleware
+import connectToDatabase from '@/lib/mongodb'; // Corrected alias import
+import Question from '@/models/Question';      // Corrected alias import
+import User from '@/models/User';              // Corrected alias import
+import { protect } from '@/middleware/auth';    // Corrected alias import
 
 /**
  * @route   POST /api/questions
