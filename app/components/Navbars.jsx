@@ -69,7 +69,10 @@ export default function Navbar() {
             // If logged in, show user info and logout button
             <div className="flex items-center space-x-2"> {/* Adjusted spacing for user info */}
               <span className="text-white text-lg font-medium">
-                Hello, {user?.username}
+                Hello, 
+                <Link href="/profile" className="text-orange-500 hover:text-orange-600 transition duration-150 ease-in-out">
+                {user?.username}
+                </Link>
               </span>
               <button
                 onClick={logout}
