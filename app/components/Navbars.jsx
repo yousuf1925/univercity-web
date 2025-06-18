@@ -3,49 +3,52 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useState } from 'react'; // Added by user
-import Image from 'next/image'; // Added by user
-import { FaUserGroup } from "react-icons/fa6"; // Added by user
-import { IoMdHome } from "react-icons/io"; // Added by user
-import { IoSearch } from "react-icons/io5"; // Added by user
-import { IoIosNotifications } from "react-icons/io"; // Added by user
-import { useAuth } from '@/context/AuthContext'; // Import useAuth hook
+import { useState } from 'react';
+import Image from 'next/image';
+import { FaUserGroup } from "react-icons/fa6";
+import { IoMdHome } from "react-icons/io";
+import { IoSearch } from "react-icons/io5";
+import { IoIosNotifications } from "react-icons/io";
+import { useAuth } from '@/context/AuthContext';
+import { FaPlusSquare } from "react-icons/fa"; // Existing icon import for Ask Question
+import { FaUserCircle } from "react-icons/fa"; // NEW: Import for Profile Icon
 
 export default function Navbar() {
   // Destructure authentication state and functions from AuthContext
   const { isLoggedIn, user, logout, loading } = useAuth();
 
   // If the authentication context is still loading, return null to prevent UI flicker
-  // You could also return a loading spinner or skeleton here.
   if (loading) {
     return null;
   }
 
   return (
-    <nav className="bg-[#262d34] text-white p-2 shadow-md fixed top-0 left-0 z-10 w-full h-16"> {/* Applied user's background color and text color */}
-      <div className='flex items-center justify-between p-0 container mx-auto'> {/* Added container and mx-auto for centering */}
+    <nav className="bg-[#262d34] text-white p-2 shadow-md fixed top-0 left-0 z-10 w-full h-16">
+      <div className='flex items-center justify-between p-0 container mx-auto'>
         {/* Logo and App Name */}
-        <div className='flex items-center gap-2'>
+        <Link href="/" className='flex items-center gap-2'>
           <Image
-            src="/profile.jpg" // Using the image path provided by the user
+            src="/profile.jpg"
             alt="User profile picture"
-            width={40}    // The desired width in pixels
-            height={40}   // The desired height in pixels
-            className="rounded-full" // Optional: for styling
+            width={40}
+            height={40}
+            className="rounded-full"
           />
           <h2 className='text-orange-500 text-2xl font-bold font-serif'>
             UniverCity
           </h2>
-        </div>
+        </Link>
 
         {/* Central Navigation Links and Search Bar */}
         <div className="flex items-center gap-4">
-          <Link href={"/"} className='hover:bg-orange-500 p-0.5 rounded-sm transition-all duration-300 ease-in-out'>
-            <IoMdHome className='h-6 w-6 text-white' /> {/* Ensures icon is white */}
+          <Link href={"page"} className='hover:bg-orange-500 p-0.5 rounded-sm transition-all duration-300 ease-in-out'>
+            <IoMdHome className='h-6 w-6 text-white' />
           </Link>
           <Link href={"/community"} className='hover:bg-orange-500 p-0.5 rounded-sm transition-all duration-300 ease-in-out'>
-            <FaUserGroup className='h-6 w-6 text-white' /> {/* Ensures icon is white */}
+            <FaUserGroup className='h-6 w-6 text-white' />
           </Link>
+         
+
           {/* Search Bar */}
           <div className="flex items-center bg-[#2c353d] rounded-lg p-1 w-96 shadow-lg">
             <input
@@ -59,15 +62,22 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Authentication/User Actions (Dynamic based on login status) */}
-        <div className='flex items-center space-x-4'> {/* Added space-x-4 for spacing between items */}
-          <button className='bg-[#2c353d] h-8 w-8 rounded-sm p-1 flex items-center justify-center'> {/* Changed align-center to justify-center */}
-            <IoIosNotifications className='h-7 w-7 text-white' /> {/* Ensures icon is white */}
+        {/* Authentication/User Actions */}
+        <div className='flex items-center space-x-4'>
+          {/* Profile Icon (NEW: Only visible if logged in) */}
+          {isLoggedIn && (
+            <Link href="/profile" className='hover:bg-orange-500 p-0.5 rounded-sm transition-all duration-300 ease-in-out'>
+              <FaUserCircle className='h-7 w-7 text-white' /> {/* Profile icon */}
+            </Link>
+          )}
+
+          <button className='bg-[#2c353d] h-8 w-8 rounded-sm p-1 flex items-center justify-center'>
+            <IoIosNotifications className='h-7 w-7 text-white' />
           </button>
 
           {isLoggedIn ? (
             // If logged in, show user info and logout button
-            <div className="flex items-center space-x-2"> {/* Adjusted spacing for user info */}
+            <div className="flex items-center space-x-2">
               <span className="text-white text-lg font-medium">
                 Hello, {user?.username}
               </span>
