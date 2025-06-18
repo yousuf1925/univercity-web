@@ -27,7 +27,7 @@ export default function Navbar() {
         {/* Logo and App Name */}
         <div className='flex items-center gap-2'>
           <Image
-            src="/profile.jpg" // Using the image path provided by the user
+            src="/profile.png" // Using the image path provided by the user
             alt="User profile picture"
             width={40}    // The desired width in pixels
             height={40}   // The desired height in pixels
