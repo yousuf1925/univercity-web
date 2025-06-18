@@ -25,7 +25,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body
         // Apply Geist font variables and antialiased class
-        className={`${geistSans.variable} ${geistMono.variable} antialiased h-full overflow-hidden`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased h-full `}
       >
         {/* Wrap your entire application content with AuthProvider */}
         <AuthProvider>

@@ -71,12 +71,12 @@ export default function Home() {
   return (
     // Main container for the homepage content, styled with dark theme
     // It will contain the AskQuestionForm and the list of QuestionCards
-    <main className="h-screen flex flex-col items-center bg-[#1e252b] text-gray-100 p-4">
+    <main className="h-screen  flex flex-col items-center bg-[#1e252b] text-gray-100  pt-0 mt-16">
     
       {/* Two-column layout container */}
       <div className="flex w-full max-w-7xl mx-auto gap-6 p-4 overflow-hidden "> {/* Added gap for spacing between columns */}
         {/* Left Column (30% width) - for future content */}
-        <aside className="hidden md:block w-3/10 p-4 bg-[#262d34] rounded-lg shadow-xl">
+        <aside className="hidden md:block w-3/10 p-4 bg-[#262d34] rounded-lg shadow-xl h-70">
           <h3 className="text-xl font-semibold text-gray-200 mb-4">Left Sidebar (Coming Soon)</h3>
           <p className="text-gray-400 text-sm">
             This area can be used for filters, trending topics, or other navigation.
@@ -84,7 +84,7 @@ export default function Home() {
         </aside>
 
         {/* Right Column (70% width) - contains Ask Question Form and Question List */}
-        <div className="flex-1 overflow-y-auto scrollbar-hidden p-4"> {/* w-full for mobile, w-7/10 for medium+ screens */}
+        <div className="flex-1 overflow-y-auto scrollbar-hidden pt-0"> {/* w-full for mobile, w-7/10 for medium+ screens */}
           {/* Render the compact Ask Question form */}
           <div className="mb-8"> {/* Added margin-bottom for spacing */}
             <AskQuestionForm />
