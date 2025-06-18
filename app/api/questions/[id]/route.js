@@ -1,141 +1,142 @@
-// src/app/api/questions/route.js
+// src/app/api/questions/[id]/route.js
 import { NextResponse } from 'next/server';
-import connectToDatabase from '@/lib/mongodb'; // Corrected alias import
-import Question from '@/models/Question';      // Corrected alias import
-import User from '@/models/User';              // Corrected alias import
-import { protect } from '@/middleware/auth';    // Corrected alias import
+import connectToDatabase from '@/lib/mongodb';
+import Question from '@/models/Question';
+import User from '@/models/User';
+import Answer from '@/models/Answer'; // Needed for cascading delete of answers
+import { protect } from '@/middleware/auth';
 
 /**
- * @route   POST /api/questions
- * @desc    Create a new question
- * @access  Private (requires authentication)
+ * @route   GET /api/questions/:id
+ * @desc    Get a single question by ID
+ * @access  Public
+ * @param {Request} request The incoming Next.js request object.
+ * @param {Object} { params } Contains dynamic route parameters, e.g., { id: questionId }.
  */
-export async function POST(request) {
-  try { // Wrap the entire POST handler in a try-catch for robust error handling
-    // 1. Authenticate the user. If not authenticated, protect() returns an error response.
-    const authUser = await protect(request);
-    // Check if protect() returned a NextResponse (indicating an error)
-    if (authUser instanceof NextResponse) {
-      return authUser; // Return the error response immediately
-    }
-    // At this point, authUser is guaranteed to be the user object if authentication was successful.
+export async function GET(request, { params }) {
+  await connectToDatabase();
 
-    // 2. Ensure database connection is established
-    await connectToDatabase();
+  try {
+    const questionId = params.id; // Get the question ID from the URL
 
-    // 3. Parse the request body to get question data
-    const { title, content } = await request.json();
+    // FIX: Using findOne explicitly to avoid any potential implicit sort issues.
+    // Also, added .lean() for potentially faster reads if we don't need Mongoose Document methods later.
+    const question = await Question.findOne({ _id: questionId })
+                                  .populate('author', 'username profilePicture university reputationScore')
+                                  .lean(); // Convert to plain JavaScript object for performance
 
-    // 4. Basic server-side validation
-    if (!title || !content) {
-      return NextResponse.json(
-        { message: 'Title and content are required.' },
-        { status: 400 }
-      );
+    if (!question) {
+      return NextResponse.json({ message: 'Question not found' }, { status: 404 });
     }
 
-    // 5. Ensure user's university data is available
-    if (!authUser.university) {
-        // This is a critical check. If a user somehow doesn't have a university, prevent question creation.
-        return NextResponse.json(
-            { message: 'User university information missing. Cannot post question.' },
-            { status: 400 }
-        );
+    // Increment view count directly on the model, outside the .lean() chain if it causes issues.
+    // This requires fetching the document again if .lean() was used and modifications are needed.
+    // Alternatively, if .lean() isn't strictly necessary, remove it.
+    // For view count, let's stick to the non-lean approach to save and keep it simple.
+    // If you remove .lean(), the `question.views += 1; await question.save();` lines will work directly.
+
+    // Re-fetching without .lean() to allow direct modification and saving
+    const liveQuestion = await Question.findById(questionId);
+    if (liveQuestion) {
+        liveQuestion.views += 1;
+        await liveQuestion.save();
     }
 
-    // 6. Create a new Question instance
-    const newQuestion = new Question({
-      title,
-      content,
-      author: authUser._id, // Use authUser._id (Mongoose object) or authUser.id (plain string)
-      university: authUser.university, // Get university from the authenticated user's profile
-      majorTags: [], // Default to empty array as not provided by frontend
-      generalTags: [], // Default to empty array as not provided by frontend
-    });
 
-    // 7. Save the new question to the database
-    const question = await newQuestion.save();
-
-    // 8. Update the author's questionsAsked count
-    await User.findByIdAndUpdate(authUser._id, { $inc: { questionsAsked: 1 } });
-
-    // 9. Respond with the created question and a 201 status
-    return NextResponse.json(question, { status: 201 });
+    // Return the found question (using the initially fetched `question` for response)
+    return NextResponse.json(question, { status: 200 });
 
   } catch (error) {
-    console.error('Create question error (backend):', error); // Log the full error object
-    // Return a generic server error response, or a more specific one if desired
-    return NextResponse.json({ message: 'Server Error: Failed to create question' }, { status: 500 });
+    console.error(`Get single question error for ID ${params.id}:`, error); // More specific logging
+    // Check if the error is a CastError, which means the ID format is wrong
+    if (error.name === 'CastError') {
+        return NextResponse.json({ message: 'Invalid question ID format.' }, { status: 400 });
+    }
+    return NextResponse.json({ message: 'Server Error: Failed to fetch question' }, { status: 500 });
   }
 }
 
 /**
- * @route   GET /api/questions
- * @desc    Get a list of all questions (with filtering, sorting, pagination)
- * @access  Public
+ * @route   PUT /api/questions/:id
+ * @desc    Update a question
+ * @access  Private (only author can update)
  */
-export async function GET(request) {
-  await connectToDatabase(); // Ensure database connection is established
+export async function PUT(request, { params }) {
+  // Authenticate the user
+  const authUser = await protect(request);
+  if (authUser instanceof NextResponse) {
+    return authUser;
+  }
+
+  await connectToDatabase();
 
   try {
-    // 1. Parse URL query parameters for filtering, sorting, and pagination
-    const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page')) || 1;
-    const limit = parseInt(searchParams.get('limit')) || 10;
-    const search = searchParams.get('search');
-    const university = searchParams.get('university'); // Keep for potential future filtering
-    const major = searchParams.get('major');           // Keep for potential future filtering
-    const tag = searchParams.get('tag');               // Keep for potential future filtering
+    const questionId = params.id;
+    const { title, content, majorTags, generalTags } = await request.json();
 
-    const query = {}; // MongoDB query object
-
-    // Add search filter (case-insensitive regex for title and content)
-    if (search) {
-      query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { content: { $regex: search, $options: 'i' } }
-      ];
-    }
-    // Add university filter
-    if (university) {
-      query.university = university;
-    }
-    // Add major tag filter
-    if (major) {
-      query.majorTags = major;
-    }
-    // Add general tag filter
-    if (tag) {
-      query.$or = [{ majorTags: tag }, { generalTags: tag }];
+    let question = await Question.findById(questionId);
+    if (!question) {
+      return NextResponse.json({ message: 'Question not found' }, { status: 404 });
     }
 
-    let sortOptions = { createdAt: -1 }; // Default sort: newest first
-    // Add sorting options
-    if (sort === 'views') {
-      sortOptions = { views: -1 }; // Sort by most views
+    if (question.author.toString() !== authUser.id) {
+      return NextResponse.json({ message: 'Not authorized to update this question' }, { status: 403 });
     }
-    // You can add more sort options like 'answers' (answersCount: -1) here
 
-    // 2. Fetch questions from the database
-    const questions = await Question.find(query)
-      .populate('author', 'username profilePicture university reputationScore') // Populate author details
-      .sort(sortOptions)
-      .limit(limit)
-      .skip((page - 1) * limit); // Apply pagination
+    question.title = title || question.title;
+    question.content = content || question.content;
+    question.majorTags = majorTags || question.majorTags;
+    question.generalTags = generalTags || question.generalTags;
 
-    // 3. Get total count of questions matching the query for pagination metadata
-    const totalQuestions = await Question.countDocuments(query);
-
-    // 4. Respond with questions and pagination metadata
-    return NextResponse.json({
-      questions,
-      totalPages: Math.ceil(totalQuestions / limit),
-      currentPage: page,
-      totalCount: totalQuestions
-    }, { status: 200 });
+    await question.save();
+    return NextResponse.json(question, { status: 200 });
 
   } catch (error) {
-    console.error('Get questions error:', error.message);
-    return NextResponse.json({ message: 'Server Error: Failed to fetch questions' }, { status: 500 });
+    console.error(`Update question error for ID ${params.id}:`, error);
+    if (error.name === 'CastError') {
+        return NextResponse.json({ message: 'Invalid question ID format.' }, { status: 400 });
+    }
+    return NextResponse.json({ message: 'Server Error: Failed to update question' }, { status: 500 });
+  }
+}
+
+/**
+ * @route   DELETE /api/questions/:id
+ * @desc    Delete a question
+ * @access  Private (only author can delete)
+ */
+export async function DELETE(request, { params }) {
+  // Authenticate the user
+  const authUser = await protect(request);
+  if (authUser instanceof NextResponse) {
+    return authUser;
+  }
+
+  await connectToDatabase();
+
+  try {
+    const questionId = params.id;
+
+    const question = await Question.findById(questionId);
+    if (!question) {
+      return NextResponse.json({ message: 'Question not found' }, { status: 404 });
+    }
+
+    if (question.author.toString() !== authUser.id) {
+      return NextResponse.json({ message: 'Not authorized to delete this question' }, { status: 403 });
+    }
+
+    await Question.deleteOne({ _id: questionId });
+    await Answer.deleteMany({ question: questionId });
+    await User.findByIdAndUpdate(authUser.id, { $inc: { questionsAsked: -1 } });
+
+    return NextResponse.json({ message: 'Question and associated answers removed successfully' }, { status: 200 });
+
+  } catch (error) {
+    console.error(`Delete question error for ID ${params.id}:`, error);
+    if (error.name === 'CastError') {
+        return NextResponse.json({ message: 'Invalid question ID format.' }, { status: 400 });
+    }
+    return NextResponse.json({ message: 'Server Error: Failed to delete question' }, { status: 500 });
   }
 }
