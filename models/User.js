@@ -22,6 +22,7 @@ const userSchema = new mongoose.Schema({
   questionsAsked: { type: Number, default: 0 },
   answersGiven: { type: Number, default: 0 },
   isVerified: { type: Boolean, default: true }, // Set to true by default, no verification needed
+  
 }, { timestamps: true });
 
 userSchema.pre('save', async function(next) {
