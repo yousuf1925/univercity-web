@@ -95,7 +95,7 @@ export default function Home() {
          
             {/* Display error message if questions failed to load */}
             {questionsError && (
-              <div className="text-red-400 text-center mb-4 p-4 bg-gray-800 rounded-lg shadow-md">
+              <div className="text-red-400 text-center mb-4 p-4bg-[#1e252b] rounded-lg shadow-md">
                 <p>{questionsError}</p>
               </div>
             )}
