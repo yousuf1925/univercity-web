@@ -34,8 +34,8 @@ export default function Navbar() {
             height={40}
             className="rounded-full"
           />
-          <h2 className='text-orange-500 text-2xl font-bold font-serif'>
-            UniverCity
+          <h2 className='text-orange-500 text-2xl font-bold font-serif' fontFamily='"Lucida Console", "Courier New", monospace'>
+            UNIVERCITY
           </h2>
         </Link>
 

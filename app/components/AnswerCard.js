@@ -26,7 +26,7 @@ export default function AnswerCard({ answer }) {
       <div className="flex items-center justify-between text-gray-400 text-sm mt-3 pt-3 border-t border-gray-600">
         <div className="flex items-center space-x-2">
           <Image
-            src={answer.author.profilePicture || "https://placehold.co/30x30/444/FFF?text=User"} // Placeholder
+            src={answer.author.profilePicture || "https://img.freepik.com/premium-vector/avatar-young-man-minimalist-cartoon-icon-drawing-vector-illustration_608387-13.jpg?w=360"} // Placeholder
             alt={answer.author.username || 'Author'}
             width={28}
             height={28}
