@@ -86,11 +86,14 @@ export default function QuestionCard({ question, onDeleteSuccess }) { // Add onD
 
         <div className="flex items-center justify-between text-gray-400 text-sm mt-4 pt-4 border-t border-gray-700">
           <div className="flex items-center space-x-2">
-            <img
+            <Image
               src={question.author.profilePicture || "https://placehold.co/40x40/555/FFF?text=User"}
               alt={question.author.username || 'Author'}
               className="rounded-full border border-gray-600 w-8 h-8"
-            />
+              width={40}
+              height={40}
+              unoptimized // Use unoptimized for external images or large images
+              ></Image>
             <span className="font-medium text-blue-400 hover:underline">
               {question.author.username}
             </span>

@@ -120,13 +120,14 @@ export default function ProfilePage() {
         <div className="md:col-span-1 bg-[#262d34]  rounded-lg shadow-xl p-6 flex flex-col items-center sticky top-8 h-fit">
           <div className="relative w-32 h-32 mb-4 rounded-full overflow-hidden border-4 border-orange-500 shadow-lg">
             {profileData.profilePicture ? (
-            //   <Image
-            //     src={profileData.profilePicture}
-            //     alt={`${profileData.username}'s profile picture`}
-            //     layout="fill"
-            //     objectFit="cover"
-            //   />
-            <img src={profileData.profilePicture} alt={`${profileData.username}'s profile picture`} className="w-full h-full object-cover" />
+              <Image
+                src={profileData.profilePicture}
+                alt={`${profileData.username}'s profile picture`}
+                layout="fill"
+                objectFit="cover"
+                unoptimized
+              />
+            // <img src={profileData.profilePicture} alt={`${profileData.username}'s profile picture`} className="w-full h-full object-cover" />
             ) : (
               // Default avatar if no profile picture
               <div className="w-full h-full bg-gray-700 flex items-center justify-center text-5xl font-bold text-gray-400">
