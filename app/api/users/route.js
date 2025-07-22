@@ -1,32 +1,21 @@
 // src/app/api/questions/route.js
 import { NextResponse } from 'next/server';
-import connectToDatabase from '@/lib/mongodb'; // Your MongoDB connection utility
-import Question from '@/models/Question';      // Your Question model
-import User from '@/models/User';              // Your User model (for updating questionsAsked count)
-import { protect } from '@/middleware/auth';    // Your authentication middleware
+import connectToDatabase from '@/lib/mongodb';
+import Question from '@/models/Question';
+import User from '@/models/User';
+import { protect } from '@/middleware/auth';
 
-/**
- * @route   POST /api/questions
- * @desc    Create a new question
- * @access  Private (requires authentication)
- */
 export async function POST(request) {
-  try { // Wrap the entire POST handler in a try-catch for robust error handling
-    // 1. Authenticate the user. If not authenticated, protect() returns an error response.
+  try {
     const authUser = await protect(request);
-    // Check if protect() returned a NextResponse (indicating an error)
     if (authUser instanceof NextResponse) {
-      return authUser; // Return the error response immediately
+      return authUser;
     }
-    // At this point, authUser is guaranteed to be the user object if authentication was successful.
 
-    // 2. Ensure database connection is established
     await connectToDatabase();
 
-    // 3. Parse the request body to get question data
     const { title, content } = await request.json();
 
-    // 4. Basic server-side validation
     if (!title || !content) {
       return NextResponse.json(
         { message: 'Title and content are required.' },
@@ -34,99 +23,82 @@ export async function POST(request) {
       );
     }
 
-    // 5. Ensure user's university data is available
     if (!authUser.university) {
-        // This is a critical check. If a user somehow doesn't have a university, prevent question creation.
-        return NextResponse.json(
-            { message: 'User university information missing. Cannot post question.' },
-            { status: 400 }
-        );
+      return NextResponse.json(
+        { message: 'User university information missing. Cannot post question.' },
+        { status: 400 }
+      );
     }
 
-    // 6. Create a new Question instance
     const newQuestion = new Question({
       title,
       content,
-      author: authUser._id, // Use authUser._id (Mongoose object) or authUser.id (plain string)
-      university: authUser.university, // Get university from the authenticated user's profile
-      majorTags: [], // Default to empty array as not provided by frontend
-      generalTags: [], // Default to empty array as not provided by frontend
+      author: authUser._id,
+      university: authUser.university,
+      majorTags: [],
+      generalTags: [],
     });
 
-    // 7. Save the new question to the database
     const question = await newQuestion.save();
 
-    // 8. Update the author's questionsAsked count
     await User.findByIdAndUpdate(authUser._id, { $inc: { questionsAsked: 1 } });
 
-    // 9. Respond with the created question and a 201 status
     return NextResponse.json(question, { status: 201 });
 
   } catch (error) {
-    console.error('Create question error (backend):', error); // Log the full error object
-    // Return a generic server error response, or a more specific one if desired
+    console.error('Create question error (backend):', error);
     return NextResponse.json({ message: 'Server Error: Failed to create question' }, { status: 500 });
   }
 }
 
-/**
- * @route   GET /api/questions
- * @desc    Get a list of all questions (with filtering, sorting, pagination)
- * @access  Public
- */
+// Get questions
 export async function GET(request) {
-  await connectToDatabase(); // Ensure database connection is established
+  await connectToDatabase();
 
   try {
-    // 1. Parse URL query parameters for filtering, sorting, and pagination
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page')) || 1;
     const limit = parseInt(searchParams.get('limit')) || 10;
     const search = searchParams.get('search');
-    const university = searchParams.get('university'); // Keep for potential future filtering
-    const major = searchParams.get('major');           // Keep for potential future filtering
-    const tag = searchParams.get('tag');               // Keep for potential future filtering
+    const university = searchParams.get('university');
+    const major = searchParams.get('major');
+    const tag = searchParams.get('tag');
+    const sort = searchParams.get('sort');
 
-    const query = {}; // MongoDB query object
+    const query = {};
 
-    // Add search filter (case-insensitive regex for title and content)
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: 'i' } },
         { content: { $regex: search, $options: 'i' } }
       ];
     }
-    // Add university filter
+
     if (university) {
       query.university = university;
     }
-    // Add major tag filter
+
     if (major) {
       query.majorTags = major;
     }
-    // Add general tag filter
+
     if (tag) {
       query.$or = [{ majorTags: tag }, { generalTags: tag }];
     }
 
-    let sortOptions = { createdAt: -1 }; // Default sort: newest first
-    // Add sorting options
+    let sortOptions = { createdAt: -1 };
     if (sort === 'views') {
-      sortOptions = { views: -1 }; // Sort by most views
+      sortOptions = { views: -1 };
     }
-    // You can add more sort options like 'answers' (answersCount: -1) here
 
-    // 2. Fetch questions from the database
     const questions = await Question.find(query)
-      .populate('author', 'username profilePicture university reputationScore') // Populate author details
+      .populate('author', 'username profilePicture university reputationScore')
       .sort(sortOptions)
       .limit(limit)
-      .skip((page - 1) * limit); // Apply pagination
+      .skip((page - 1) * limit);
 
-    // 3. Get total count of questions matching the query for pagination metadata
     const totalQuestions = await Question.countDocuments(query);
 
-    // 4. Respond with questions and pagination metadata
     return NextResponse.json({
       questions,
       totalPages: Math.ceil(totalQuestions / limit),

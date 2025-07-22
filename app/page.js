@@ -1,126 +1,104 @@
-// src/app/page.js
-"use client"; // This component needs to be a client component to use hooks
+'use client';
 
-import React, { useState, useEffect } from "react"; // Import React, useState, useEffect
-import Link from "next/link"; // Still useful for error messages/navigation links
-import { useAuth } from "@/context/AuthContext"; // Import useAuth hook for authentication loading state
-import AskQuestionForm from "./components/AskQuestionForm"; // Import the compact Ask Question form
-import QuestionCard from "./components/QuestionCard"; // Import the QuestionCard component
-import Navbar from "./components/Navbars";
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
+import AskQuestionForm from './components/AskQuestionForm';
+import QuestionCard from './components/QuestionCard';
+import Navbar from './components/Navbars';
 import "./globals.css";
 import NewsCard from "./components/NewsCard";
 
 export default function Home() {
-  // Get authentication loading state from AuthContext (to show global loading message)
-  const { loading: authLoading } = useAuth();
+  const { loading: authLoading } = useAuth(); 
 
-  // State for storing fetched questions
   const [questions, setQuestions] = useState([]);
-  // State for tracking loading status of questions fetch
   const [questionsLoading, setQuestionsLoading] = useState(true);
-  // State for storing any errors during questions fetch
-  const [questionsError, setQuestionsError] = useState("");
+  const [questionsError, setQuestionsError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
-  // useEffect hook to fetch questions when the component mounts
-  useEffect(() => {
-    const fetchQuestions = async () => {
-      setQuestionsLoading(true); // Set loading to true before fetching
-      setQuestionsError(""); // Clear any previous errors
+  const fetchQuestions = async (search = '') => {
+    setQuestionsLoading(true);
+    setQuestionsError('');
 
-      try {
-        // Make the API call to your backend endpoint for listing questions
-        const response = await fetch("http://localhost:3000/api/questions", {
-          method: "GET", // Use GET method
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+    try {
+      const url = search
+        ? `http://localhost:3000/api/questions?search=${encodeURIComponent(search)}`
+        : 'http://localhost:3000/api/questions';
 
-        const data = await response.json(); // Parse the JSON response
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
 
-        if (!response.ok) {
-          // If the response is not OK (e.g., 400, 500 status), set an error message
-          setQuestionsError(
-            data.message || "Failed to fetch questions from the server."
-          );
-          return;
-        }
+      const data = await response.json();
 
-        // If successful, update the questions state with the fetched data
-        // Assuming the API returns an object with a 'questions' array
-        setQuestions(data.questions);
-      } catch (err) {
-        // Catch any network errors or other unexpected issues
-        console.error("Error fetching questions:", err);
-        setQuestionsError(
-          "An unexpected error occurred while fetching questions. Please try again later."
-        );
-      } finally {
-        setQuestionsLoading(false); // Set loading to false after fetch attempt
+      if (!response.ok) {
+        setQuestionsError(data.message || 'Failed to fetch questions.');
+        return;
       }
-    };
 
-    fetchQuestions(); // Call the fetch function when the component mounts
-  }, []); // Empty dependency array means this effect runs only once on mount
+      setQuestions(data.questions);
+    } catch (err) {
+      console.error('Error fetching questions:', err);
+      setQuestionsError('An unexpected error occurred.');
+    } finally {
+      setQuestionsLoading(false);
+    }
+  };
 
-  // Display a loading indicator if authentication data or questions are still loading
+  useEffect(() => {
+    fetchQuestions(); // Fetch all on initial load
+  }, []);
+
+  const handleSearch = (text) => {
+    event.preventDefault(); // Prevent default form submission
+    setSearchTerm(text);
+    fetchQuestions(text);
+  };
+
   if (authLoading || questionsLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-gray-300">
-        {/* Shows specific loading message based on what's loading */}
-        {authLoading ? "Loading authentication..." : "Loading questions..."}
+      <div className="min-h-screen flex items-center justify-center bg-[#1e252b] text-gray-300">
+        {authLoading ? 'Loading authentication...' : 'Loading questions...'}
       </div>
     );
   }
 
   return (
-    // Main container for the homepage content, styled with dark theme
-    // It will contain the AskQuestionForm and the list of QuestionCards
-    <main className="h-screen  flex flex-col items-center bg-[#1e252b] text-gray-100  pt-0 mt-16">
-      {/* Two-column layout container */}
-      <div className="flex w-full max-w-7xl mx-auto gap-6 p-4 overflow-hidden ">
-        {" "}
-        {/* Added gap for spacing between columns */}
-          <aside className="hidden md:block w-3/10 p-4 bg-[#262d34] rounded-lg shadow-xl h-[40vh]">
-           <NewsCard></NewsCard>
-          </aside>
-          {/* Right Column (70% width) - contains Ask Question Form and Question List */}
+    <main className="h-screen flex flex-col items-center bg-[#1e252b] text-gray-100 pt-0 mt-16">
+      <Navbar onSearch={handleSearch} />
+
+      <div className="flex w-full max-w-7xl mx-auto gap-6 p-4 overflow-hidden">
+        <NewsCard />
+
         <div className="flex-1 overflow-y-auto scrollbar-hidden pt-0">
-          {" "}
-          {/* w-full for mobile, w-7/10 for medium+ screens */}
-          {/* Render the compact Ask Question form */}
           <div className="mb-8">
-            {" "}
-            {/* Added margin-bottom for spacing */}
             <AskQuestionForm />
           </div>
-          {/* Section for displaying questions */}
+
           <section className="w-full">
-            {/* Display error message if questions failed to load */}
             {questionsError && (
-              <div className="text-red-400 text-center mb-4 p-4bg-[#1e252b] rounded-lg shadow-md">
+              <div className="text-red-400 text-center mb-4 p-4 bg-[#1e252b] rounded-lg shadow-md">
                 <p>{questionsError}</p>
               </div>
             )}
 
-            {/* Conditionally render questions list or loading/empty state */}
-            {questionsLoading ? (
-              // Show a local loading spinner/message for questions while fetching
-              <div className="bg-gray-800 p-6 rounded-lg shadow-md text-gray-400 text-center">
-                Loading recent questions...
-              </div>
-            ) : // If not loading, check if there are questions or display empty message
-            questions.length === 0 ? (
+            {questions.length === 0 ? (
               <div className="bg-gray-800 p-6 rounded-lg shadow-md text-gray-400 text-center">
                 <p>No questions posted yet.</p>
               </div>
             ) : (
-              // Render the list of QuestionCards
               <div className="space-y-6">
-                {" "}
-                {/* Adds vertical spacing between cards */}
                 {questions.map((question) => (
-                  <QuestionCard key={question._id} question={question} />
+                  <QuestionCard 
+                    key={question._id} 
+                    question={question} 
+                    isAuthor={true} 
+                    onDeleteSuccess={(deletedId) =>
+                      setQuestions(prev => prev.filter(q => q._id !== deletedId))
+                    }
+                  />
                 ))}
               </div>
             )}

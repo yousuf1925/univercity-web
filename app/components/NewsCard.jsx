@@ -2,11 +2,11 @@ import React from 'react'
 
 const NewsCard = () => {
 return (
-    <div>
-        <section className="max-w-xl mx-auto">
-            <h3 className="text-4xl font-bold text-gray-200 mb-6">
+    <div >
+        <section className="max-w-xl mx-auto bg-[#262d34] p-7 rounded-2xl" >
+            <h4 className="text-4xl font-bold text-gray-200 mb-6">
                 Admissions News
-            </h3>
+            </h4>
             <ul className="space-y-4">
                 <li>
                     <div className="flex items-center bg-[#2c353d] rounded-lg shadow p-4">

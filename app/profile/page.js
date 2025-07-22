@@ -4,8 +4,9 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext'; // Your Auth context
+import { useAuth } from '@/context/AuthContext'; 
 import Image from 'next/image'; // For optimized images
+import QuestionCard from '../components/QuestionCard';
 
 export default function ProfilePage() {
   const { user: currentUser, token, logout } = useAuth();
@@ -27,6 +28,7 @@ export default function ProfilePage() {
         setError('');
 
         // 1. Fetch authenticated user's profile data
+        // Assuming your /api/profile endpoint returns the authenticated user's data
         const profileResponse = await fetch('http://localhost:3000/api/profile', {
           method: 'GET',
           headers: {
@@ -49,15 +51,13 @@ export default function ProfilePage() {
           return;
         }
 
-        setProfileData(profileDataJson.user); // The API returns { user: ... }
-
-        // 2. Fetch user's questions
-        // This API endpoint still needs to be created if it doesn't exist: src/app/api/users/[id]/questions/route.js
-        const questionsResponse = await fetch(`http://localhost:3000/api/users/${profileDataJson.user._id}/questions`, {
+        setProfileData(profileDataJson.user);
+        const userId = profileDataJson.user._id; 
+   const questionsResponse = await fetch(`http://localhost:3000/api/users/${userId}/questions`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`, // Can be protected or public depending on your needs
+             'Authorization': `Bearer ${token}`,
           },
         });
 
@@ -65,12 +65,11 @@ export default function ProfilePage() {
 
         if (!questionsResponse.ok) {
           setError(questionsData.message || 'Failed to fetch user questions.');
-          // Optionally, don't stop loading entirely if only questions failed but profile succeeded
           setLoading(false);
           return;
         }
 
-        setUserQuestions(questionsData); // Assuming questionsData is an array of questions
+        setUserQuestions(questionsData); 
 
       } catch (err) {
         console.error('Error fetching profile or questions:', err);
@@ -114,19 +113,20 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 p-4 sm:p-6 md:p-8 mt-[3%]">
+    <div className="min-h-screen bg-[#1e252b] text-gray-100 p-4 sm:p-6 md:p-8 mt-[5%]">
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
 
         {/* Left Column: Profile Info */}
-        <div className="md:col-span-1 bg-gray-800 rounded-lg shadow-xl p-6 flex flex-col items-center sticky top-8 h-fit">
+        <div className="md:col-span-1 bg-[#262d34]  rounded-lg shadow-xl p-6 flex flex-col items-center sticky top-8 h-fit">
           <div className="relative w-32 h-32 mb-4 rounded-full overflow-hidden border-4 border-orange-500 shadow-lg">
             {profileData.profilePicture ? (
-              <Image
-                src={profileData.profilePicture}
-                alt={`${profileData.username}'s profile picture`}
-                layout="fill"
-                objectFit="cover"
-              />
+            //   <Image
+            //     src={profileData.profilePicture}
+            //     alt={`${profileData.username}'s profile picture`}
+            //     layout="fill"
+            //     objectFit="cover"
+            //   />
+            <img src={profileData.profilePicture} alt={`${profileData.username}'s profile picture`} className="w-full h-full object-cover" />
             ) : (
               // Default avatar if no profile picture
               <div className="w-full h-full bg-gray-700 flex items-center justify-center text-5xl font-bold text-gray-400">
@@ -160,7 +160,7 @@ export default function ProfilePage() {
           </div>
 
           <div className="mt-8 w-full space-y-4">
-  
+            {/* Added Edit Profile Link */}
             <button
               onClick={logout}
               className="w-full flex items-center justify-center py-3 px-6 rounded-md bg-gray-700 hover:bg-gray-600 text-gray-200 font-semibold transition duration-200 ease-in-out shadow-md"
@@ -176,50 +176,19 @@ export default function ProfilePage() {
 
           {userQuestions.length > 0 ? (
             userQuestions.map((question) => (
-              <div key={question._id} className="bg-gray-800 rounded-lg shadow-xl p-5 border border-gray-700">
-                <Link href={`/questions/${question._id}`} className="block">
-                  <h3 className="text-xl font-semibold text-gray-100 hover:text-orange-400 transition-colors duration-200">
-                    {question.title}
-                  </h3>
-                  <p className="text-gray-400 text-sm mt-2 line-clamp-2">{question.content}</p>
-                </Link>
-                <div className="flex justify-between items-center text-gray-500 text-xs mt-4">
-                  <span className="text-gray-400">
-                    Asked on {new Date(question.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                  </span>
-                  <div className="flex space-x-4">
-                    <span className="flex items-center text-purple-400">
-                      {/* Views Icon */}
-                      <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                        <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-                      </svg>
-                      {question.views || 0} Views
-                    </span>
-                    <span className="flex items-center text-green-400">
-                      {/* Answers Icon */}
-                      <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.746-1.348l-2.463.856a1 1 0 01-1.292-1.292l.856-2.463A8.841 8.841 0 012 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM9 9a1 1 0 000 2h2a1 1 0 100-2H9z" clipRule="evenodd" />
-                      </svg>
-                      {question.answersCount || 0} Answers
-                    </span>
-                  </div>
-                </div>
-                {question.majorTags && question.majorTags.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {question.majorTags.map((tag, index) => (
-                      <span key={index} className="bg-orange-700 text-orange-200 text-xs px-2 py-1 rounded-full">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))
-          ) : (
+              <QuestionCard 
+  key={question._id} 
+  question={question} 
+  isAuthor={true} 
+  onDeleteSuccess={(deletedId) => {
+    setUserQuestions(prev => prev.filter(q => q._id !== deletedId));
+  }}
+/>
+            )
+          )) : (
             <div className="bg-gray-800 rounded-lg shadow-xl p-5 text-center text-gray-400">
               You haven't asked any questions yet.
-              <Link href="/ask-question" className="block mt-4 text-orange-400 hover:underline">
+              <Link href="/" className="block mt-4 text-orange-400 hover:underline">
                 Ask your first question!
               </Link>
             </div>

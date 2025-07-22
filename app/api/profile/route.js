@@ -1,8 +1,8 @@
-// src/app/api/profile/route.js  <-- This is where the authenticated user fetches THEIR OWN profile
+
 import { NextResponse } from 'next/server';
-import connectToDatabase from '@/lib/mongodb'; // Make sure this path is correct
+import connectToDatabase from '@/lib/mongodb'; 
 import User from '@/models/User';
-import { protect } from '@/middleware/auth'; // Your authentication middleware
+import { protect } from '@/middleware/auth'; 
 
 /**
  * @route   GET /api/profile
@@ -11,22 +11,20 @@ import { protect } from '@/middleware/auth'; // Your authentication middleware
  * @param {Request} request The incoming Next.js request object.
  */
 export async function GET(request) {
-  // 1. Authenticate the user
+
   const authUser = await protect(request);
   if (authUser instanceof NextResponse) {
-    // If protect returns a NextResponse, it means authentication failed
     return authUser;
   }
 
-  // 2. Connect to the database
   await connectToDatabase();
 
   try {
-    // 3. Find the user by their ID (from the authenticated token), excluding the password hash
+    
     const user = await User.findById(authUser.id).select('-password');
 
     if (!user) {
-      // This case should theoretically not happen if authUser.id is valid and from a current user
+      
       return NextResponse.json({ message: 'User not found in database' }, { status: 404 });
     }
 

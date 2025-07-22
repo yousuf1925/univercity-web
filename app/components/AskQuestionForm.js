@@ -9,7 +9,7 @@ import { useAuth } from '../../context/AuthContext';
 
 
 export default function AskQuestionForm() {
-  const router = useRouter(); // Initialize useRouter
+  const router = useRouter(); 
   const { user, token, isLoggedIn, loading: authLoading } = useAuth(); // Get user, token, isLoggedIn, authLoading
 
   // State for form inputs - only title and content
@@ -17,11 +17,10 @@ export default function AskQuestionForm() {
   const [content, setContent] = useState('');
 
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false); // For form submission loading state
+  const [loading, setLoading] = useState(false); 
   const [successMessage, setSuccessMessage] = useState('');
 
-  // No explicit redirect useEffect in this component anymore, as it always renders.
-  // The redirection will now happen on form submission if not logged in.
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,25 +28,20 @@ export default function AskQuestionForm() {
     setError('');
     setSuccessMessage('');
 
-    // Client-side validation
+    
     if (!title || !content) {
       setError('Both title and content are required.');
       setLoading(false);
       return;
     }
-
-    // IMPORTANT: If not logged in or token is missing, redirect to login
     if (!token || !isLoggedIn) {
       setError('You must be logged in to ask a question. Redirecting to login...');
       setLoading(false);
-      // Immediately redirect to the login page
+      
       router.push('/login');
-      return; // Stop execution
+      return; 
     }
-
-    // Ensure user.university is available before attempting to post
-    // This handles the edge case where user might be logged in, but user object is not fully loaded
-    if (!user || !user.university) {
+ if (!user || !user.university) {
         setError('User data not fully loaded. Please try again or re-login.');
         setLoading(false);
         return;
@@ -63,9 +57,7 @@ export default function AskQuestionForm() {
         body: JSON.stringify({
           title,
           content,
-          // university, majorTags, generalTags are handled by the backend
-          // Backend will derive university from the logged-in user and set tags to empty.
-        }),
+           }),
       });
 
       const data = await response.json();

@@ -20,7 +20,6 @@ export async function GET(request, { params }) {
     const questionId = params.id; // Get the question ID from the URL
 
     // FIX: Using findOne explicitly to avoid any potential implicit sort issues.
-    // Also, added .lean() for potentially faster reads if we don't need Mongoose Document methods later.
     const question = await Question.findOne({ _id: questionId })
                                   .populate('author', 'username profilePicture university reputationScore')
                                   .lean(); // Convert to plain JavaScript object for performance
@@ -30,12 +29,7 @@ export async function GET(request, { params }) {
     }
 
     // Increment view count directly on the model, outside the .lean() chain if it causes issues.
-    // This requires fetching the document again if .lean() was used and modifications are needed.
-    // Alternatively, if .lean() isn't strictly necessary, remove it.
-    // For view count, let's stick to the non-lean approach to save and keep it simple.
-    // If you remove .lean(), the `question.views += 1; await question.save();` lines will work directly.
 
-    // Re-fetching without .lean() to allow direct modification and saving
     const liveQuestion = await Question.findById(questionId);
     if (liveQuestion) {
         liveQuestion.views += 1;
@@ -56,11 +50,7 @@ export async function GET(request, { params }) {
   }
 }
 
-/**
- * @route   PUT /api/questions/:id
- * @desc    Update a question
- * @access  Private (only author can update)
- */
+
 export async function PUT(request, { params }) {
   // Authenticate the user
   const authUser = await protect(request);

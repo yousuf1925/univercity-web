@@ -10,19 +10,17 @@ import AnswerCard from '../../components/AnswerCard'; // Import the AnswerCard c
 
 export default function SingleQuestionPage() {
   const params = useParams(); 
-  const router = useRouter(); // Initialize router for redirection
-  const questionId = params.id; // The ID of the question obtained from the URL
+  const router = useRouter(); 
+  const questionId = params.id; 
+  const { isLoggedIn, token } = useAuth();
+  const [question, setQuestion] = useState(null); 
+  const [answers, setAnswers] = useState([]); 
+  const [newAnswerContent, setNewAnswerContent] = useState(''); 
 
-  const { isLoggedIn, token } = useAuth(); // Get login status and authentication token from context
-
-  const [question, setQuestion] = useState(null); // State to store the fetched question details
-  const [answers, setAnswers] = useState([]); // State to store the fetched answers/comments
-  const [newAnswerContent, setNewAnswerContent] = useState(''); // State for the new answer input
-
-  const [loadingQuestion, setLoadingQuestion] = useState(true); // Loading state for the question
-  const [loadingAnswers, setLoadingAnswers] = useState(true);   // Loading state for answers
-  const [questionError, setQuestionError] = useState('');       // Error state for question fetch
-  const [answerError, setAnswerError] = useState('');           // Error state for answer fetch/post
+  const [loadingQuestion, setLoadingQuestion] = useState(true); 
+  const [loadingAnswers, setLoadingAnswers] = useState(true);   
+  const [questionError, setQuestionError] = useState('');       
+  const [answerError, setAnswerError] = useState('');           
   const [postAnswerLoading, setPostAnswerLoading] = useState(false); // Loading state for posting new answer
 
 
@@ -193,13 +191,14 @@ export default function SingleQuestionPage() {
 
         {/* Author Info (Image, Username, University, Date) */}
         <div className="flex items-center space-x-3 text-gray-400 text-sm mb-6 pb-4 border-b border-gray-700">
-          <Image
+          {/* <Image
             src={question.author?.profilePicture || "https://placehold.co/40x40/555/FFF?text=User"}
             alt={question.author?.username || 'Author'}
             width={40}
             height={40}
             className="rounded-full border border-gray-600"
-          />
+          /> */}
+          <img src={question.author?.profilePicture || "https://placehold.co/40x40/555/FFF?text=User"} alt={question.author?.username || 'Author'} className="rounded-full border border-gray-600 w-10 h-10" />
           <div className="flex flex-col">
             <span className="font-medium text-blue-400">{question.author?.username}</span>
             <span className="text-gray-500">{question.author?.university}</span>
@@ -269,3 +268,4 @@ export default function SingleQuestionPage() {
     </div>
   );
 }
+// src/app/questions/[id]/page.js

@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: 'University QA Platform', // Retaining your desired title
+  title: 'UNIVERCITY', 
   description: 'A Q&A platform for university students.', // Retaining your desired description
 };
 
@@ -24,14 +24,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        // Apply Geist font variables and antialiased class
         className={`${geistSans.variable} ${geistMono.variable} antialiased h-full `}
       >
-        {/* Wrap your entire application content with AuthProvider */}
         <AuthProvider>
-          {/* Your global Navbar component */}
           <Navbar/>
-          {children} {/* This represents your page components */}
+          {children} 
         </AuthProvider>
       </body>
     </html>

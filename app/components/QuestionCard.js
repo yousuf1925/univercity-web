@@ -1,5 +1,5 @@
-// src/components/QuestionCard.js
-'use client'; // Client component for click handlers and navigation
+// Render question card
+'use client';
 
 import React, { useState } from 'react'; // Import useState for local state (loading, error)
 import Link from 'next/link';
@@ -10,11 +10,10 @@ import { useAuth } from '@/context/AuthContext'; // Your Auth context
 
 export default function QuestionCard({ question, onDeleteSuccess }) { // Add onDeleteSuccess prop
   const router = useRouter();
-  const { user: currentUser, token } = useAuth(); // No need for logout here unless you want to trigger it from the card
+  const { user: currentUser, token } = useAuth(); 
   const [deleting, setDeleting] = useState(false); // State for delete loading
   const [deleteError, setDeleteError] = useState(''); // State for delete error
-
-  // Basic check for valid question data
+   const isAuthor = currentUser && currentUser.id === question.author._id; // Check if the current user is the author of the question
   if (!question || !question.author) {
     return (
       <div className="bg-gray-800 p-4 rounded-lg shadow-md text-red-400">
@@ -23,11 +22,6 @@ export default function QuestionCard({ question, onDeleteSuccess }) { // Add onD
     );
   }
 
-  // Determine if the current logged-in user is the author of this question
-  const isAuthor =  currentUser.id === question.author._id;
-  console.log(isAuthor, currentUser.id, question.author._id); // Debugging line to check author status
-
-  // Function to truncate content for display on the card
   const truncateContent = (text, maxLength = 150) => {
     if (text.length <= maxLength) return text;
     return text.substring(0, maxLength) + '...';
@@ -58,11 +52,10 @@ export default function QuestionCard({ question, onDeleteSuccess }) { // Add onD
         setDeleteError(errorData.message || 'Failed to delete question.');
         return;
       }
-       router.refresh();
-      // If deletion is successful, trigger the onDeleteSuccess callback
-      // This allows the parent component (e.g., ProfilePage) to update its list of questions
+      
       if (onDeleteSuccess) {
         onDeleteSuccess(question._id);
+       
       } else {
         // Fallback: if no callback provided, refresh the page (less ideal UX)
         router.refresh(); // Or router.push(router.pathname) to force re-render
@@ -80,29 +73,23 @@ export default function QuestionCard({ question, onDeleteSuccess }) { // Add onD
   return (
     // The main card is still a Link, but the delete button will prevent default navigation
     <Link
-      href={`/questions/${question._id}`} // Link to the full question page
+      href={`/questions/${question._id}`}
       passHref
       className="block bg-[#262d34] p-6 rounded-lg shadow-xl hover:shadow-2xl hover:bg-gray-700 transition-all duration-300 ease-in-out cursor-pointer border border-gray-700 hover:border-blue-500"
     >
       <div className="flex flex-col space-y-4">
-        {/* Question Title */}
         <h3 className="text-2xl font-bold text-gray-100">{question.title}</h3>
 
-        {/* Question Content Snippet */}
         <p className="text-gray-300 text-base leading-relaxed">
           {truncateContent(question.content)}
         </p>
 
-        {/* Author, Views, Answers, and Delete Button Section */}
         <div className="flex items-center justify-between text-gray-400 text-sm mt-4 pt-4 border-t border-gray-700">
-          {/* Author Info */}
           <div className="flex items-center space-x-2">
-            <Image
-              src={question.author.profilePicture || "https://placehold.co/32x32/1a202c/e2e8f0?text=U"} // More generic placeholder
+            <img
+              src={question.author.profilePicture || "https://placehold.co/40x40/555/FFF?text=User"}
               alt={question.author.username || 'Author'}
-              width={32}
-              height={32}
-              className="rounded-full border border-gray-600"
+              className="rounded-full border border-gray-600 w-8 h-8"
             />
             <span className="font-medium text-blue-400 hover:underline">
               {question.author.username}
@@ -110,7 +97,6 @@ export default function QuestionCard({ question, onDeleteSuccess }) { // Add onD
             <span className="text-gray-500"> • {question.university}</span>
           </div>
 
-          {/* Views, Answers, and Delete Button */}
           <div className="flex items-center space-x-4">
             <span className="flex items-center space-x-1">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
