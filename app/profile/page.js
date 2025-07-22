@@ -188,7 +188,7 @@ export default function ProfilePage() {
             )
           )) : (
             <div className="bg-gray-800 rounded-lg shadow-xl p-5 text-center text-gray-400">
-              You haven't asked any questions yet.
+              You havent&apos; asked any questions yet.
               <Link href="/" className="block mt-4 text-orange-400 hover:underline">
                 Ask your first question!
               </Link>

@@ -21,11 +21,13 @@ export default function AnswerCard({ answer }) {
 
       <div className="flex items-center justify-between text-gray-400 text-sm mt-3 pt-3 border-t border-gray-600">
         <div className="flex items-center space-x-2">
-          <img
-            src={answer.author.profilePicture || "https://placehold.co/30x30/444/FFF?text=User"}
+         <Image
+          src={answer.author.profilePicture || "https://placehold.co/30x30/444/FFF?text=User"}
             alt={answer.author.username || 'Author'}
             className="rounded-full border border-gray-500 w-7 h-7"
-          />
+            width={30}
+            height={30}
+            unoptimized ></Image>// Use unoptimized for external images or large images>
           <span className="font-medium text-blue-300">
             {answer.author.username}
           </span>
