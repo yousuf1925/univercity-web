@@ -27,7 +27,7 @@ export default function AnswerCard({ answer }) {
             className="rounded-full border border-gray-500 w-7 h-7"
             width={30}
             height={30}
-            unoptimized ></Image>// Use unoptimized for external images or large images
+            unoptimized ></Image>
           <span className="font-medium text-blue-300">
             {answer.author.username}
           </span>
