@@ -29,7 +29,7 @@ export default function ProfilePage() {
 
         // 1. Fetch authenticated user's profile data
         // Assuming your /api/profile endpoint returns the authenticated user's data
-        const profileResponse = await fetch('http://localhost:3000/api/profile', {
+        const profileResponse = await fetch('/api/profile', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -53,7 +53,7 @@ export default function ProfilePage() {
 
         setProfileData(profileDataJson.user);
         const userId = profileDataJson.user._id; 
-   const questionsResponse = await fetch(`http://localhost:3000/api/users/${userId}/questions`, {
+   const questionsResponse = await fetch(`/api/users/${userId}/questions`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

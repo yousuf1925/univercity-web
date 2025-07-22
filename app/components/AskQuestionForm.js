@@ -48,7 +48,7 @@ export default function AskQuestionForm() {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/api/questions', { // Ensure port is 3001
+      const response = await fetch('/api/questions', { // Ensure port is 3001
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

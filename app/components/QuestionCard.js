@@ -39,7 +39,7 @@ export default function QuestionCard({ question, onDeleteSuccess }) { // Add onD
     setDeleteError('');
 
     try {
-      const response = await fetch(`http://localhost:3000/api/questions/${question._id}`, {
+      const response = await fetch(`/api/questions/${question._id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

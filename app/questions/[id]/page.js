@@ -30,7 +30,7 @@ export default function SingleQuestionPage() {
     setQuestionError('');
     try {
       // Make API call to fetch a single question by its ID
-      const response = await fetch(`http://localhost:3000/api/questions/${questionId}`, {
+      const response = await fetch(`/api/questions/${questionId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

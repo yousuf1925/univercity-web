@@ -21,7 +21,7 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:3000/api/auth', {
+      const response = await fetch('/api/auth', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
