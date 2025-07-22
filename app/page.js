@@ -23,8 +23,8 @@ export default function Home() {
 
     try {
       const url = search
-        ? `http://localhost:3000/api/questions?search=${encodeURIComponent(search)}`
-        : 'http://localhost:3000/api/questions';
+        ? `/api/questions?search=${encodeURIComponent(search)}`
+        : '/api/questions';
 
       const response = await fetch(url, {
         method: 'GET',
