@@ -51,7 +51,16 @@ export async function POST(request) {
     return NextResponse.json({
       message: 'Registration successful!',
       token,
-      user: { id: user._id, username: user.username, email: user.email, isVerified: user.isVerified, profilePicture: user.profilePicture } // Include profilePicture in response
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        university: user.university,
+        major: user.major,
+        reputationScore: user.reputationScore,
+        isVerified: user.isVerified,
+        profilePicture: user.profilePicture,
+      },
     }, { status: 201 });
 
   } catch (error) {

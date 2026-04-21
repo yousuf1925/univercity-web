@@ -59,7 +59,7 @@ export default function SingleQuestionPage() {
     setAnswerError('');
     try {
       // Make API call to fetch answers for the specific question ID
-      const response = await fetch(`http://localhost:3000/api/answers/${questionId}`, {
+      const response = await fetch(`/api/answers/${questionId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -115,7 +115,7 @@ export default function SingleQuestionPage() {
 
     try {
       // Make API call to post the new answer
-      const response = await fetch('http://localhost:3000/api/answers', {
+      const response = await fetch('/api/answers', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
