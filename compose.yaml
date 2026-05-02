@@ -10,7 +10,7 @@ services:
       - .:/app
 
     env_file:
-      - /home/ubuntu/.env   # ✅ external env file
+      - /var/lib/jenkins/.env   # ✅ external env file
 
     ports:
       - "3002:3000"   # host:container
